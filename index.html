@@ -1,137 +1,810 @@
 <!DOCTYPE html>
 <html lang="cs">
-<head>
-    <meta property="og:title" content="Diamantové malování – Návrhář předloh">
-    <meta property="og:description" content="Nahraj obrázek, vytvoř A4 mřížku s DMC barvami, upravuj, exportuj PNG/PDF.">
-    <meta property="og:image" content="https://vufduxor.github.io/Diamond_malovani/nahled.png">
-    <meta property="og:url" content="https://vufduxor.github.io/Diamond_malovani/">
-    <meta property="og:type" content="website">
+<head> <meta property="og:title" content="Diamantové malování – Editor předloh | BY Vufdux">
+    <meta property="og:description" content="Vytvořte si vlastní předlohu pro diamantové malování. Nahrajte obrázek, vyberte DMC barvy, upravte mřížku a exportujte.">
     <meta name="theme-color" content="#6366f1">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diamantové malování – Návrhář předloh • BY Vufdux</title>
+    <title>Diamantové malování  • BY Vufdux</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:system-ui,sans-serif;background:#0d0d0d;color:#e0e0e0;padding:1.5rem}
-        h1{font-size:22px;font-weight:500;margin-bottom:2px;color:#fff}
-        .by-vufdux{font-size:11px;color:#666;margin-bottom:1.2rem;font-style:italic;letter-spacing:0.5px}
-        .subtitle{font-size:13px;color:#999;margin-bottom:1.5rem}
-        .row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:1.2rem}
-        .panel{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:1rem}
-        .upload-area{border:1.5px dashed #444;border-radius:10px;padding:2rem 1rem;text-align:center;cursor:pointer;transition:all 0.15s;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#111}
-        .upload-area:hover{background:#1a1a1a;border-color:#6366f1}
-        .btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border:1px solid #333;border-radius:8px;font-size:13px;font-weight:500;background:#222;color:#e0e0e0;cursor:pointer;transition:all 0.12s;white-space:nowrap}
-        .btn:hover{background:#2a2a2a;border-color:#555}
-        .btn:active{transform:scale(0.98)}
-        .btn-primary{background:#6366f1;color:#fff;border-color:#6366f1}
-        .btn-primary:hover{background:#5558e6}
-        .btn-primary:disabled{background:#333;border-color:#333;color:#666;cursor:not-allowed}
-        .btn-success{background:#10b981;color:#fff;border-color:#10b981}
-        .btn-success:hover{background:#059669}
-        .btn-danger{background:#ef4444;color:#fff;border-color:#ef4444}
-        .btn-warning{background:#f59e0b;color:#000;border-color:#f59e0b}
-        .btn-small{padding:4px 10px;font-size:11px}
-        .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
-        .stat{background:#222;border-radius:8px;padding:10px 12px;border:1px solid #2a2a2a}
-        .stat .val{font-size:16px;font-weight:500;color:#fff}
-        .stat .lbl{font-size:11px;color:#888;margin-top:2px}
-        #grid-wrapper{position:relative;overflow:auto;max-height:500px;border:1px solid #2a2a2a;border-radius:8px;background:#1a1a1a}
-        #grid-canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges;cursor:crosshair}
-        .legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-        .leg-item{display:flex;align-items:center;gap:4px;font-size:11px;color:#bbb;font-family:monospace;background:#222;padding:3px 6px;border-radius:4px;border:1px solid #2a2a2a;cursor:pointer;transition:all 0.12s;user-select:none}
-        .leg-item:hover{background:#2a2a2a;border-color:#6366f1}
-        .leg-item.selected{border-color:#6366f1!important;background:#1a1a2e!important;box-shadow:0 0 10px rgba(99,102,241,0.4)}
-        .leg-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0;border:1px solid rgba(255,255,255,0.2)}
-        .leg-num{font-weight:700;color:#fff;min-width:18px;text-align:right;font-size:11px}
-        .leg-code{font-weight:700;color:#e0e0e0;min-width:45px;font-size:10px}
-        .section-title{font-size:13px;font-weight:500;margin-bottom:8px;color:#ccc}
-        .range-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-        .range-val{font-size:14px;font-weight:500;min-width:36px;color:#fff}
-        #preview-img{max-width:100%;max-height:120px;border-radius:8px;object-fit:contain;display:none;margin-top:8px}
-        .hidden{display:none!important}
-        progress{width:100%;height:5px;border-radius:3px;accent-color:#6366f1}
-        .seg{display:flex;border:1px solid #333;border-radius:8px;overflow:hidden}
-        .seg-btn{flex:1;padding:7px 10px;font-size:12px;font-weight:500;background:#1a1a1a;color:#888;cursor:pointer;border:none;transition:all 0.12s;text-align:center}
-        .seg-btn.active{background:#6366f1;color:#fff}
-        .seg-btn:not(.active):hover{background:#2a2a2a;color:#ccc}
-        .orient-preview{display:flex;gap:10px;margin-top:8px;align-items:flex-end}
-        .orient-box{border:2px solid #333;border-radius:2px;transition:all 0.2s;opacity:0.35}
-        .orient-box.active{border-color:#6366f1;opacity:1}
-        input[type=range]{width:100%;accent-color:#6366f1}
-        table{width:100%;border-collapse:collapse;font-size:12px}
-        td,th{padding:6px 8px;color:#ccc}
-        tr{border-bottom:1px solid #2a2a2a}
-        th{color:#888;font-weight:500}
-        .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
-        .note{font-size:11px;color:#888;margin-top:4px;line-height:1.4}
-        .export-btns{display:flex;gap:6px;flex-wrap:wrap}
-        .footer-credit{text-align:center;font-size:10px;color:#444;margin-top:2rem;padding-top:1rem;border-top:1px solid #222}
-        .toggle-row{display:flex;align-items:center;gap:8px;margin-top:5px}
-        .toggle-switch{position:relative;width:40px;height:22px;display:inline-block}
-        .toggle-switch input{opacity:0;width:0;height:0}
-        .toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#333;border-radius:22px;transition:0.2s}
-        .toggle-slider:before{content:"";position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.2s}
-        input:checked+.toggle-slider{background:#6366f1}
-        input:checked+.toggle-slider:before{transform:translateX(18px)}
-        .palette-info{font-size:10px;color:#888;margin-top:2px}
-        .palette-loaded{color:#10b981;font-weight:600}
-        textarea{width:100%;height:80px;font-size:10px;font-family:monospace;border:1px solid #333;border-radius:6px;padding:6px;resize:vertical;margin-top:4px;background:#111;color:#ccc}
-        .editor-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#1a1a2e;border-radius:8px;border:1px solid #6366f133;margin-bottom:8px}
-        .editor-toolbar .sep{width:1px;height:24px;background:#333}
-        .status-bar{display:flex;gap:12px;align-items:center;font-size:10px;color:#888;margin-top:4px}
-        .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-        .status-dot.on{background:#10b981}
-        .status-dot.off{background:#ef4444}
-        .diamond-size-row{display:flex;align-items:center;gap:8px;margin-top:6px}
-        .diamond-size-row label{font-size:11px;color:#999;min-width:60px}
-        .diamond-size-row input{width:70px;background:#222;border:1px solid #333;color:#fff;padding:4px 8px;border-radius:4px;font-size:12px}
-        .grid-info{font-size:10px;color:#888;margin-top:2px}
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --radius: 16px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --grad: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39); } 50% { box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.59), 0 0 20px rgba(99, 102, 241, 0.3); } }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: radial-gradient(ellipse 80% 50% at 20% 40%, #1e1b4b, transparent), radial-gradient(ellipse 80% 50% at 80% 60%, #312e81, transparent), radial-gradient(ellipse 80% 50% at 40% 90%, #1e293b, transparent), #0f172a;
+            background-attachment: fixed;
+            color: var(--text-main);
+            padding: 2rem;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--grad);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+            text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .by-vufdux {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            display: inline-block;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .app-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius);
+            padding: 3rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: inset 0 0 60px rgba(99, 102, 241, 0.1);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+            transform: scale(1.02);
+            box-shadow: inset 0 0 60px rgba(99, 102, 241, 0.1), 0 0 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .upload-area .icon {
+            font-size: 3rem;
+            filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.5));
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .upload-area:hover .icon {
+            transform: scale(1.1) rotate(5deg);
+            filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.8));
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+
+        .btn:active { transform: scale(0.95); }
+
+        .btn-primary {
+            background: var(--grad);
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.23);
+        }
+
+        .btn-primary:disabled {
+            background: #334155;
+            cursor: not-allowed;
+            box-shadow: none;
+            filter: none;
+            animation: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .seg {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .seg-btn {
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        .seg-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .control-group { margin-bottom: 1.5rem; }
+
+        input[type=range] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            appearance: none;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        .range-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .range-val {
+            font-weight: 700;
+            color: var(--primary-light);
+            font-size: 1.125rem;
+        }
+
+        #preview-img {
+            max-width: 100%;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-top: 1rem;
+            display: none;
+            border: 1px solid var(--border);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            border-radius: var(--radius);
+            text-align: center;
+            animation: slideIn 0.5s ease-out backwards;
+        }
+
+        .stat-card .val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: block;
+            color: var(--primary-light);
+        }
+
+        .stat-card:nth-child(1) .val { color: var(--primary-light); }
+        .stat-card:nth-child(2) .val { color: var(--secondary); }
+        .stat-card:nth-child(3) .val { color: #f59e0b; }
+        .stat-card:nth-child(4) .val { color: #ef4444; }
+
+        .stat-card .lbl {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        #grid-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: var(--radius);
+            overflow: auto;
+            border: 1px solid var(--border);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            margin: 1rem 0;
+            max-height: 70vh;
+        }
+
+        #grid-canvas {
+            display: block;
+            image-rendering: pixelated;
+            cursor: crosshair;
+            margin: 0 auto;
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .leg-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .leg-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .leg-item.selected {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .leg-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .leg-info { display: flex; flex-direction: column; }
+        .leg-num { font-size: 0.625rem; color: var(--text-muted); font-weight: 700; }
+        .leg-code { font-size: 0.75rem; font-weight: 700; }
+
+        .editor-toolbar {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            padding: 0.75rem 1.25rem;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .sep { width: 1px; height: 20px; background: var(--border); }
+
+        .progress-container {
+            margin-top: 1rem;
+        }
+
+        progress {
+            width: 100%;
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            appearance: none;
+        }
+
+        progress::-webkit-progress-bar { background: rgba(255, 255, 255, 0.1); }
+        progress::-webkit-progress-value { background: var(--grad); }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.875rem;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #334155;
+            border-radius: 24px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider:before {
+            content: "";
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px; bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        input:checked + .toggle-slider { background: var(--primary); }
+        input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+        .hidden { display: none !important; }
+
+        .footer-credit {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px;
+        }
+        .status-dot.on { background: var(--secondary); box-shadow: 0 0 8px var(--secondary); }
+        .status-dot.off { background: #ef4444; }
+
+        .diamond-size-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            width: 80px;
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            border-radius: 10px;
+            padding: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            resize: vertical;
+        }
+
+        .export-btns {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+        }
+
+        .orient-preview {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .orient-box {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .orient-box.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .orient-box::after {
+            content: "";
+            position: absolute;
+            top: 2px; left: 2px; right: 2px; bottom: 2px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .status-bar { display:flex; justify-content:space-between; align-items:center; background:#111; padding:0.5rem 1rem; border-radius:0 0 12px 12px; font-size:0.75rem; border-top:1px solid #222; }
+        .status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; }
+        .status-dot.on { background:#10b981; box-shadow:0 0 8px #10b981; }
+        .status-dot.off { background:#666; }
+        
+        /* Nové styly pro přepínače */
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            cursor: pointer;
+            background: rgba(255,255,255,0.05);
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .toggle-item:hover { background: rgba(255,255,255,0.1); }
+        .toggle-item input { cursor: pointer; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
-<h1>Diamantové malování – Návrhář předloh</h1>
-<p class="by-vufdux">BY Vufdux</p>
-<p class="subtitle" id="subtitle">A4 na výšku · 75 × 106 = 7 950 kamínků · 2,8 mm/kamínek · DMC barvy</p>
+<div class="container">
+    <header>
+        <p class="by-vufdux">BY Vufdux</p>
+        <h1>Diamantové malování</h1>
+        <p class="subtitle" id="subtitle">A4 na výšku · 75 × 106 = 7 950 kamínků · 2,8 mm/kamínek · DMC barvy</p>
+    </header>
 
-<div class="row">
-    <div style="flex:1;min-width:200px">
-        <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
-            <div style="font-size:32px;line-height:1">🖼</div>
-            <p>Klikněte nebo přetáhněte obrázek</p>
-            <p style="font-size:11px">JPG · PNG · WEBP</p>
-            <input type="file" id="file-input" accept="image/*" style="display:none">
+    <main class="app-grid">
+        <section>
+            <div class="panel" style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                    <div class="icon">🖼️</div>
+                    <div>
+                        <p style="font-weight: 700; font-size: 1.125rem;">Klikněte nebo přetáhněte obrázek</p>
+                        <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">Podporuje JPG, PNG a WEBP</p>
+                    </div>
+                    <input type="file" id="file-input" accept="image/*" style="display:none">
+                </div>
+                <img id="preview-img" alt="náhled">
+                
+                <div id="progress-wrap" class="hidden progress-container">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-size: 0.875rem; font-weight: 600;" id="progress-label">Zpracovávám...</span>
+                        <span style="font-size: 0.875rem; color: var(--primary-light);" id="progress-pct">0%</span>
+                    </div>
+                    <progress id="prog" value="0" max="100"></progress>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" style="display:flex; flex-direction:column; gap:1.5rem">
+            <div class="control-group">
+                <div class="section-title">Formát papíru</div>
+                <div class="seg" id="paper-format-seg">
+                    <button class="seg-btn" id="fmt-a5" onclick="setFormat('A5')">A5</button>
+                    <button class="seg-btn active" id="fmt-a4" onclick="setFormat('A4')">A4</button>
+                    <button class="seg-btn" id="fmt-a3" onclick="setFormat('A3')">A3</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="section-title">Orientace papíru</div>
+                <div class="seg">
+                    <button class="seg-btn active" id="o-portrait" onclick="setOrient('portrait')">Na výšku</button>
+                    <button class="seg-btn" id="o-landscape" onclick="setOrient('landscape')">Na šířku</button>
+                </div>
+                <div class="orient-preview">
+                    <div class="orient-box active" id="prev-portrait" style="width:24px;height:34px"></div>
+                    <div style="font-size:0.75rem; color: var(--text-muted); line-height:1.4" id="orient-info">75 × 106<br>kamínků</div>
+                    <div class="orient-box" id="prev-landscape" style="width:34px;height:24px"></div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="section-title">Přizpůsobení obrázku</div>
+                <div class="seg">
+                    <button class="seg-btn active" id="fit-fill" onclick="setFit('fill')">Vyplnit vše</button>
+                    <button class="seg-btn" id="fit-contain" onclick="setFit('contain')">Vejít se celý</button>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.25rem">
+                        <span>Jas</span>
+                        <span id="bright-val">100%</span>
+                    </div>
+                    <input type="range" id="bright-slider" min="50" max="150" value="100" oninput="updateFilters()">
+                    
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem; margin-bottom:0.25rem">
+                        <span>Kontrast</span>
+                        <span id="contrast-val">100%</span>
+                    </div>
+                    <input type="range" id="contrast-slider" min="50" max="150" value="100" oninput="updateFilters()">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="section-title">Velikost kamínku</div>
+                <div style="display:flex; align-items:center; gap:0.75rem">
+                    <input type="number" class="diamond-size-input" id="diamond-size" value="2.8" min="1.0" max="10.0" step="0.1" onchange="updateDiamondSize()">
+                    <span style="font-size:0.875rem; color: var(--text-muted)">mm</span>
+                </div>
+                <div style="font-size:0.75rem; color: var(--text-muted); margin-top:0.5rem" id="grid-info">Mřížka: 75 × 106 = 7 950 kamínků</div>
+            </div>
+
+            <div class="control-group">
+                <div class="section-title">Paleta barev</div>
+                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom: 0.75rem;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="use-custom-palette" onchange="togglePaletteMode()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span style="font-size:0.875rem; color: var(--text-main)">Použít vlastní DMC paletu</span>
+                </div>
+                
+                <div id="custom-palette-section" class="hidden" style="animation: fadeIn 0.3s ease-out;">
+                    <textarea id="palette-input" placeholder="#d5d4d2,1&#10;#c7c9cd,2&#10;..."></textarea>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; margin-top:0.5rem">
+                        <button class="btn btn-secondary btn-small" style="padding: 0.5rem;" onclick="loadPaletteFromInput()">Načíst text</button>
+                        <button class="btn btn-secondary btn-small" style="padding: 0.5rem;" onclick="loadDefaultPalette()">Výchozí</button>
+                    </div>
+                    <div style="margin-top:0.75rem">
+                        <input type="file" id="palette-file-input" accept=".txt,.csv" style="font-size:0.75rem; color: var(--text-muted)" onchange="loadPaletteFile(this)">
+                    </div>
+                </div>
+                <div style="font-size:0.75rem; color: var(--secondary); font-weight: 600;" id="active-palette-info">Aktivní: Výchozí DMC (447 barev)</div>
+            </div>
+
+            <div class="control-group">
+                <div class="section-title">Počet barev</div>
+                <input type="range" id="color-count" min="0" max="100" value="15" step="1">
+                <div class="range-info">
+                    <span style="font-size:0.75rem; color: var(--text-muted)">0 = automaticky</span>
+                    <span class="range-val" id="color-count-val">15</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.75rem; margin-top: 0.75rem;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="use-dithering">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span style="font-size:0.875rem; color: var(--text-main)">Dithering (Rozptyl barev)</span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="process-btn" style="width:100%" disabled>✨ Vygenerovat mřížku</button>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; margin-top:0.5rem">
+                <button class="btn btn-secondary btn-small" onclick="saveProject()">💾 Uložit projekt</button>
+                <button class="btn btn-secondary btn-small" onclick="document.getElementById('project-file-input').click()">📂 Načíst projekt</button>
+                <input type="file" id="project-file-input" accept=".json" style="display:none" onchange="loadProject(this)">
+            </div>
+            <button class="btn btn-secondary" id="change-image-btn" style="width:100%; margin-top:0.5rem" onclick="changeImage()">Změnit obrázek</button>
+        </section>
+    </main>
+
+    <div id="result-section" class="hidden" style="animation: fadeIn 0.8s ease-out;">
+        <div id="result-settings" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:1rem; margin-bottom:1.5rem">
+            <div class="section-title" style="margin-top:0; margin-bottom:1rem; font-size:0.9rem">Nastavení zobrazení mřížky</div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:0.75rem">
+                <label class="toggle-item">
+                    <input type="checkbox" id="view-numbers" onchange="drawGrid()" checked>
+                    <span>Zobrazit čísla</span>
+                </label>
+                <label class="toggle-item">
+                    <input type="checkbox" id="view-bold-grid" onchange="drawGrid()">
+                    <span>Výraznější mřížka</span>
+                </label>
+            </div>
         </div>
-        <img id="preview-img" alt="náhled">
+
+        <div class="stat-grid">
+            <div class="stat-card" style="animation-delay: 0.1s;"><span class="val" id="s-cols">75</span><span class="lbl">Sloupců</span></div>
+            <div class="stat-card" style="animation-delay: 0.2s;"><span class="val" id="s-rows">106</span><span class="lbl">Řádků</span></div>
+            <div class="stat-card" style="animation-delay: 0.3s;"><span class="val" id="s-total">7 950</span><span class="lbl">Celkem</span></div>
+            <div class="stat-card" style="animation-delay: 0.4s;"><span class="val" id="s-colors">0</span><span class="lbl">DMC barev</span></div>
+        </div>
+
+        <div class="panel">
+            <div class="editor-toolbar">
+                <span style="font-size:0.875rem; font-weight:700; color:#fff">🎨 Editor mřížky</span>
+                <div class="sep"></div>
+                <button class="btn btn-secondary btn-small" id="btn-edit-mode" onclick="toggleEditMode()">Zapnout editor</button>
+                <div class="sep"></div>
+                <button class="btn btn-secondary btn-small" id="btn-brush" onclick="setTool('brush')" disabled>🖌️ Štětec</button>
+                <button class="btn btn-secondary btn-small" id="btn-picker" onclick="setTool('picker')" disabled>🧪 Kapátko</button>
+                <button class="btn btn-secondary btn-small" id="btn-marker" onclick="setTool('marker')" disabled>✅ Hotovo</button>
+                <button class="btn btn-secondary btn-small" id="btn-eraser" onclick="setTool('eraser')" disabled>🧽 Guma</button>
+                <button class="btn btn-secondary btn-small" id="btn-fill" onclick="setTool('fill')" disabled>🫗 Vyplnit</button>
+                <div class="sep"></div>
+                <button class="btn btn-secondary btn-small" id="btn-undo" onclick="undoEdit()" disabled>↩️</button>
+                <button class="btn btn-secondary btn-small" id="btn-redo" onclick="redoEdit()" disabled>↪️</button>
+                <div class="sep"></div>
+                <span style="font-size:0.625rem; color: var(--text-muted)">Ctrl+kolečko = zoom | Pravé tlačítko = posun</span>
+            </div>
+
+            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                <h2 id="grid-title" style="font-size: 1.25rem; font-weight: 700;">Mřížka 75 × 106</h2>
+                
+                <div style="display:flex; gap:1rem; align-items:center;">
+                    <div style="display:flex; flex-direction:column; gap:0.25rem">
+                        <div style="display:flex; align-items:center; gap:0.5rem">
+                            <span style="font-size:0.625rem; color:var(--text-muted)">Průhlednost vrstvy:</span>
+                            <input type="range" id="overlay-opacity" min="0" max="100" value="0" style="width:60px" oninput="drawGrid()">
+                        </div>
+                    </div>
+                    <div class="zoom-controls">
+                        <button class="btn btn-secondary" style="padding: 0 0.5rem; border:none; background:transparent" id="zoom-out">−</button>
+                        <span id="zoom-label" style="font-size:0.75rem; font-weight:700; min-width:30px; text-align:center">4px</span>
+                        <button class="btn btn-secondary" style="padding: 0 0.5rem; border:none; background:transparent" id="zoom-in">+</button>
+                        <button class="btn btn-secondary" style="padding: 0 0.5rem; border:none; background:transparent" id="btn-fit" onclick="fitGrid()" title="Přizpůsobit oknu">⛶</button>
+                    </div>
+                    
+                    <div class="export-btns">
+                        <button class="btn btn-primary btn-small" id="download-grid-btn">PNG 300 DPI</button>
+                        <button class="btn btn-secondary btn-small" style="background: var(--secondary); color: white; border:none" id="download-pdf-btn">PDF A4</button>
+                        <button class="btn btn-secondary btn-small" id="download-legend-btn">Legenda PNG</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="grid-wrapper"><canvas id="grid-canvas"></canvas></div>
+            
+            <div class="status-bar">
+                <span><span class="status-dot off" id="edit-indicator"></span> <span id="edit-status">Editor vypnutý</span></span>
+                <span id="cursor-info">Připraveno</span>
+                <span id="edit-count" style="display:none">Změněno: 0 čtverečků</span>
+            </div>
+
+            <div style="margin-top:2rem">
+                <div class="section-title">Legenda DMC barev</div>
+                <p style="font-size:0.75rem; color: var(--text-muted); margin-bottom: 1rem;">V editoru klikněte na barvu pro výběr.</p>
+                <div class="legend" id="legend"></div>
+            </div>
+
+            <div style="margin-top:2rem">
+                <div class="section-title">Spotřeba kamínků</div>
+                <div style="overflow-x: auto;">
+                    <table id="color-table"></table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="panel" style="flex:1;min-width:210px;display:flex;flex-direction:column;gap:14px">
-        <div><div class="section-title">Orientace formátu A4</div><div class="seg"><div class="seg-btn active" id="o-portrait" onclick="setOrient('portrait')">Na výšku</div><div class="seg-btn" id="o-landscape" onclick="setOrient('landscape')">Na šířku</div></div><div class="orient-preview"><div class="orient-box active" id="prev-portrait" style="width:22px;height:31px"></div><div style="font-size:10px;color:#888;line-height:1.5" id="orient-info">75 × 106<br>kamínků</div><div class="orient-box" id="prev-landscape" style="width:31px;height:22px"></div></div></div>
-        <div><div class="section-title">Přizpůsobení obrázku</div><div class="seg"><div class="seg-btn active" id="fit-fill" onclick="setFit('fill')">Vyplnit vše</div><div class="seg-btn" id="fit-contain" onclick="setFit('contain')">Vejít se celý</div></div></div>
-        <div><div class="section-title">Velikost kamínku</div><div class="diamond-size-row"><label>Průměr:</label><input type="number" id="diamond-size" value="2.8" min="1.0" max="10.0" step="0.1" onchange="updateDiamondSize()"><span style="font-size:11px;color:#888">mm (1,0 – 10,0)</span></div><div class="grid-info" id="grid-info">Mřížka: 75 × 106 = 7 950 kamínků</div></div>
-        <div><div class="section-title">Paleta barev</div><div class="toggle-row"><label class="toggle-switch"><input type="checkbox" id="use-custom-palette" onchange="togglePaletteMode()"><span class="toggle-slider"></span></label><span style="font-size:11px;color:#999">Použít vlastní DMC paletu</span></div><div id="custom-palette-section" class="hidden" style="margin-top:8px"><textarea id="palette-input" placeholder="#d5d4d2,1&#10;#c7c9cd,2&#10;..."></textarea><div style="display:flex;gap:6px;margin-top:4px"><button class="btn btn-small" onclick="loadPaletteFromInput()">Načíst z textu</button><button class="btn btn-small" onclick="loadDefaultPalette()">Výchozí DMC</button></div></div><div style="margin-top:6px"><input type="file" id="palette-file-input" accept=".txt,.csv" style="font-size:11px;color:#999" onchange="loadPaletteFile(this)"></div><div class="palette-info" style="margin-top:4px" id="active-palette-info">Aktivní: <strong>Výchozí DMC (447 barev)</strong></div></div>
-        <div><div class="section-title">Počet barev <span style="font-size:10px;color:#888">(0 = automaticky)</span></div><div class="range-row"><input type="range" id="color-count" min="0" max="100" value="15" step="1" style="flex:1"><span class="range-val" id="color-count-val">15</span></div></div>
-        <button class="btn btn-primary" id="process-btn" style="width:100%" disabled>Vygenerovat mřížku</button>
-        <button class="btn btn-small" id="change-image-btn" style="width:100%;margin-top:4px" onclick="changeImage()">Změnit obrázek</button>
-        <div id="progress-wrap" class="hidden"><div style="font-size:11px;color:#888;margin-bottom:4px" id="progress-label">Zpracovávám...</div><progress id="prog" value="0" max="100"></progress></div>
-    </div>
+    <footer class="footer-credit">
+        <p>© 2026 BY Vufdux · Diamantové malování</p>
+    </footer>
 </div>
 
-<div id="result-section" class="hidden">
-    <div class="stat-row"><div class="stat"><div class="val" id="s-cols">75</div><div class="lbl">Sloupců</div></div><div class="stat"><div class="val" id="s-rows">106</div><div class="lbl">Řádků</div></div><div class="stat"><div class="val" id="s-total">7 950</div><div class="lbl">Kamínků celkem</div></div><div class="stat"><div class="val" id="s-colors">0</div><div class="lbl">DMC barev</div></div></div>
-
-    <div class="editor-toolbar"><span style="font-size:12px;font-weight:600;color:#fff">Editor mřížky</span><div class="sep"></div><button class="btn btn-small" id="btn-edit-mode" onclick="toggleEditMode()">Zapnout editor</button><button class="btn btn-small" id="btn-brush" onclick="setTool('brush')" disabled>Štětec</button><button class="btn btn-small" id="btn-eraser" onclick="setTool('eraser')" disabled>Guma</button><button class="btn btn-small" id="btn-fill" onclick="setTool('fill')" disabled>Vyplnit</button><div class="sep"></div><button class="btn btn-small btn-warning" id="btn-undo" onclick="undoEdit()" disabled>Zpět</button><button class="btn btn-small btn-danger" id="btn-redo" onclick="redoEdit()" disabled>Znovu</button><div class="sep"></div><span style="font-size:10px;color:#888">Ctrl+kolečko = zoom | Pravé tlačítko = posun</span></div>
-
-    <div class="toolbar"><div class="section-title" style="margin:0" id="grid-title">Mřížka 75 × 106</div><div style="flex:1"></div><button class="btn btn-xs" id="zoom-out" title="Oddálit">−</button><span id="zoom-label" style="font-size:11px;color:#888;min-width:30px;text-align:center">4px</span><button class="btn btn-xs" id="zoom-in" title="Přiblížit">+</button><button class="btn btn-xs" id="btn-fit" onclick="fitGrid()" title="Přizpůsobit oknu">⬜</button><div class="export-btns"><button class="btn btn-primary btn-small" id="download-grid-btn">PNG 300 DPI</button><button class="btn btn-success btn-small" id="download-pdf-btn">PDF A4 (2 strany)</button><button class="btn btn-small" id="download-legend-btn">Legenda PNG</button></div></div>
-
-    <div id="grid-wrapper"><canvas id="grid-canvas"></canvas></div>
-    <div class="status-bar"><span><span class="status-dot off" id="edit-indicator"></span> <span id="edit-status">Editor vypnutý</span></span><span id="cursor-info">Připraveno</span><span id="edit-count" style="display:none">Změněno: 0 čtverečků</span></div>
-
-    <div style="margin-top:16px"><div class="section-title">Legenda DMC barev <span style="font-size:10px;color:#888">(v editoru: klikni pro výběr barvy)</span></div><div class="legend" id="legend"></div></div>
-    <div style="margin-top:16px"><div class="section-title">Spotřeba kamínků</div><div id="color-table"></div></div>
-</div>
-
-<p class="footer-credit">BY Vufdux</p>
 <canvas id="hidden-canvas" style="display:none"></canvas>
 
 <script>
@@ -261,14 +934,44 @@ var DEFAULT_DMC_COLORS = [
 ];
 
 var activePalette=DEFAULT_DMC_COLORS.slice(),useCustomPalette=false;
-var COLS=75,ROWS=106,palette=[],gridData=null,cellSize=4,fitMode='fill',orientMode='portrait',loadedImage=null;
+var paperFormat='A4',COLS=75,ROWS=106,palette=[],gridData=null,cellSize=4,fitMode='fill',orientMode='portrait',loadedImage=null;
 var zoomLevels=[2,3,4,5,6,8,10,14,18,24],zoomIdx=2;
-var editMode=false,currentTool='brush',selectedColorIndex=0,editHistory=[],redoStack=[],totalEdits=0;
-var A4_WIDTH_MM=210,A4_HEIGHT_MM=297,DPI=300,MM_TO_INCH=1/25.4;
-var A4_PORTRAIT_W=Math.round(A4_WIDTH_MM*MM_TO_INCH*DPI),A4_PORTRAIT_H=Math.round(A4_HEIGHT_MM*MM_TO_INCH*DPI);
-var DIAMOND_MM=2.8,DIAMOND_PX=Math.round(DIAMOND_MM*MM_TO_INCH*DPI),MARGIN_MM=8,MARGIN_PX=Math.round(MARGIN_MM*MM_TO_INCH*DPI);
+var editMode=false,currentTool='brush',selectedColorIndex=0,editHistory=[],redoStack=[],totalEdits=0,doneData=null;
+var PAPER_SIZES={
+  'A5': { w: 148, h: 210 },
+  'A4': { w: 210, h: 297 },
+  'A3': { w: 297, h: 420 }
+};
+var DPI=300,MM_TO_INCH=1/25.4;
+var DIAMOND_MM=2.8,MARGIN_MM=8,MARGIN_PX=Math.round(MARGIN_MM*MM_TO_INCH*DPI);
 
-function recalcGrid(){var availW,availH;if(orientMode==='portrait'){availW=A4_WIDTH_MM-2*MARGIN_MM;availH=A4_HEIGHT_MM-2*MARGIN_MM;}else{availW=A4_HEIGHT_MM-2*MARGIN_MM;availH=A4_WIDTH_MM-2*MARGIN_MM;}COLS=Math.floor(availW/DIAMOND_MM);ROWS=Math.floor(availH/DIAMOND_MM);document.getElementById('s-cols').textContent=COLS;document.getElementById('s-rows').textContent=ROWS;document.getElementById('s-total').textContent=(COLS*ROWS).toLocaleString();document.getElementById('orient-info').innerHTML=COLS+' × '+ROWS+'<br>kamínků';document.getElementById('grid-title').textContent='Mřížka '+COLS+' × '+ROWS;document.getElementById('grid-info').textContent='Mřížka: '+COLS+' × '+ROWS+' = '+(COLS*ROWS).toLocaleString()+' kamínků';document.getElementById('subtitle').textContent='A4 na '+(orientMode==='portrait'?'výšku':'šířku')+' · '+COLS+' × '+ROWS+' = '+(COLS*ROWS).toLocaleString()+' kamínků · '+DIAMOND_MM.toFixed(1)+' mm/kamínek · DMC barvy';}
+function getPaperPx(){
+  var size = PAPER_SIZES[paperFormat];
+  var w = Math.round(size.w*MM_TO_INCH*DPI);
+  var h = Math.round(size.h*MM_TO_INCH*DPI);
+  return { w: w, h: h };
+}
+
+function recalcGrid(){
+  var size = PAPER_SIZES[paperFormat];
+  var availW, availH;
+  if(orientMode==='portrait'){
+    availW = size.w - 2*MARGIN_MM;
+    availH = size.h - 2*MARGIN_MM;
+  } else {
+    availW = size.h - 2*MARGIN_MM;
+    availH = size.w - 2*MARGIN_MM;
+  }
+  COLS=Math.floor(availW/DIAMOND_MM);
+  ROWS=Math.floor(availH/DIAMOND_MM);
+  document.getElementById('s-cols').textContent=COLS;
+  document.getElementById('s-rows').textContent=ROWS;
+  document.getElementById('s-total').textContent=(COLS*ROWS).toLocaleString();
+  document.getElementById('orient-info').innerHTML=COLS+' × '+ROWS+'<br>kamínků';
+  document.getElementById('grid-title').textContent='Mřížka '+COLS+' × '+ROWS;
+  document.getElementById('grid-info').textContent='Mřížka: '+COLS+' × '+ROWS+' = '+(COLS*ROWS).toLocaleString()+' kamínků';
+  document.getElementById('subtitle').textContent=paperFormat+' na '+(orientMode==='portrait'?'výšku':'šířku')+' · '+COLS+' × '+ROWS+' = '+(COLS*ROWS).toLocaleString()+' kamínků · '+DIAMOND_MM.toFixed(1)+' mm/kamínek · DMC barvy';
+}
 function precomputePaletteRGB(pal){for(var i=0;i<pal.length;i++){var h=pal[i].hex;pal[i].rgb=[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}}
 precomputePaletteRGB(activePalette);
 
@@ -282,13 +985,39 @@ function findClosestInPaletteRaw(rgb,pal){if(!pal||pal.length===0)return null;va
 function findClosestInPalette(rgb,pal){if(!pal||pal.length===0)return null;if(isVeryDark(rgb)){for(var i=0;i<pal.length;i++)if(pal[i].rgb[0]<=5&&pal[i].rgb[1]<=5&&pal[i].rgb[2]<=5)return pal[i];}if(isVeryLight(rgb)){for(var i=0;i<pal.length;i++)if(pal[i].rgb[0]>=250&&pal[i].rgb[1]>=250&&pal[i].rgb[2]>=250)return pal[i];}if(isGrayish(rgb))return findClosestGray(rgb,pal);var best=0,bestD=Infinity;for(var i=0;i<pal.length;i++){var d=colorDistance(rgb,pal[i].rgb);if(isGrayish(pal[i].rgb)&&!isGrayish(rgb))d*=2.5;if(d<bestD){bestD=d;best=i;}}return pal[best];}
 
 function parsePaletteText(text){var lines=text.split(/[\n\r]+/).filter(function(l){return l.trim().length>0}),result=[];for(var i=0;i<lines.length;i++){var parts=lines[i].split(',');if(parts.length>=2){var hex=parts[0].trim().toLowerCase(),code=parts[1].trim();if(hex.match(/^#[0-9a-f]{6}$/))result.push({hex:hex,code:code});}}return result;}
-function updateDiamondSize(){DIAMOND_MM=parseFloat(document.getElementById('diamond-size').value)||2.8;DIAMOND_MM=Math.max(1.0,Math.min(10.0,DIAMOND_MM));DIAMOND_PX=Math.round(DIAMOND_MM*MM_TO_INCH*DPI);recalcGrid();if(gridData){gridData=null;resultSection.classList.add('hidden');}if(loadedImage)processBtn.disabled=false;}
+function updateDiamondSize(){
+  DIAMOND_MM=parseFloat(document.getElementById('diamond-size').value)||2.8;
+  DIAMOND_MM=Math.max(1.0,Math.min(10.0,DIAMOND_MM));
+  recalcGrid();
+  if(gridData){gridData=null;resultSection.classList.add('hidden');}
+  if(loadedImage)processBtn.disabled=false;
+}
+function setFormat(fmt){
+  paperFormat=fmt;
+  var btns=document.querySelectorAll('#paper-format-seg .seg-btn');
+  btns.forEach(function(b){b.classList.remove('active');});
+  document.getElementById('fmt-'+fmt.toLowerCase()).classList.add('active');
+  recalcGrid();
+  if(gridData){gridData=null;resultSection.classList.add('hidden');}
+}
 function togglePaletteMode(){useCustomPalette=document.getElementById('use-custom-palette').checked;if(useCustomPalette){document.getElementById('custom-palette-section').classList.remove('hidden');document.getElementById('color-count').disabled=true;document.getElementById('color-count-val').textContent='Všechny';}else{document.getElementById('custom-palette-section').classList.add('hidden');document.getElementById('color-count').disabled=false;document.getElementById('color-count-val').textContent=document.getElementById('color-count').value;activePalette=DEFAULT_DMC_COLORS.slice();precomputePaletteRGB(activePalette);}}
 function loadPaletteFromInput(){var text=document.getElementById('palette-input').value,pal=parsePaletteText(text);if(pal.length>0){activePalette=pal;precomputePaletteRGB(activePalette);useCustomPalette=true;document.getElementById('use-custom-palette').checked=true;document.getElementById('custom-palette-section').classList.remove('hidden');}}
 function loadDefaultPalette(){activePalette=DEFAULT_DMC_COLORS.slice();precomputePaletteRGB(activePalette);useCustomPalette=false;document.getElementById('use-custom-palette').checked=false;document.getElementById('custom-palette-section').classList.add('hidden');document.getElementById('color-count').disabled=false;}
 function loadPaletteFile(input){var file=input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(ev){var pal=parsePaletteText(ev.target.result);if(pal.length>0){activePalette=pal;precomputePaletteRGB(activePalette);useCustomPalette=true;document.getElementById('use-custom-palette').checked=true;document.getElementById('custom-palette-section').classList.remove('hidden');}};reader.readAsText(file);}
 document.getElementById('palette-input').value=DEFAULT_DMC_COLORS.map(function(d){return d.hex+','+d.code;}).join('\n');
-function getPrintCellSize(){var maxGridW,maxGridH;if(orientMode==='portrait'){maxGridW=A4_PORTRAIT_W-2*MARGIN_PX;maxGridH=A4_PORTRAIT_H-2*MARGIN_PX;}else{maxGridW=A4_PORTRAIT_H-2*MARGIN_PX;maxGridH=A4_PORTRAIT_W-2*MARGIN_PX;}return Math.max(4,Math.min(Math.floor(maxGridW/COLS),Math.floor(maxGridH/ROWS),DIAMOND_PX));}
+function getPrintCellSize(){
+  var px = getPaperPx();
+  var maxGridW, maxGridH;
+  if(orientMode==='portrait'){
+    maxGridW = px.w - 2*MARGIN_PX;
+    maxGridH = px.h - 2*MARGIN_PX;
+  } else {
+    maxGridW = px.h - 2*MARGIN_PX;
+    maxGridH = px.w - 2*MARGIN_PX;
+  }
+  var dpx = Math.round(DIAMOND_MM*MM_TO_INCH*DPI);
+  return Math.max(4, Math.min(Math.floor(maxGridW/COLS), Math.floor(maxGridH/ROWS), dpx));
+}
 
 var fileInput=document.getElementById('file-input'),dropZone=document.getElementById('drop-zone'),previewImg=document.getElementById('preview-img'),processBtn=document.getElementById('process-btn'),colorSlider=document.getElementById('color-count'),colorValEl=document.getElementById('color-count-val'),resultSection=document.getElementById('result-section'),gridCanvas=document.getElementById('grid-canvas'),gridWrapper=document.getElementById('grid-wrapper'),hiddenCanvas=document.getElementById('hidden-canvas'),progressWrap=document.getElementById('progress-wrap'),progressLabel=document.getElementById('progress-label'),prog=document.getElementById('prog');
 
@@ -301,9 +1030,10 @@ fileInput.onchange=function(){if(fileInput.files[0])loadFile(fileInput.files[0])
 function setOrient(mode){orientMode=mode;recalcGrid();document.getElementById('o-portrait').className=(mode==='portrait')?'seg-btn active':'seg-btn';document.getElementById('o-landscape').className=(mode==='landscape')?'seg-btn active':'seg-btn';document.getElementById('prev-portrait').className=(mode==='portrait')?'orient-box active':'orient-box';document.getElementById('prev-landscape').className=(mode==='landscape')?'orient-box active':'orient-box';if(gridData){gridData=null;resultSection.classList.add('hidden');}}
 function setFit(mode){fitMode=mode;document.getElementById('fit-fill').className=(mode==='fill')?'seg-btn active':'seg-btn';document.getElementById('fit-contain').className=(mode==='contain')?'seg-btn active':'seg-btn';}
 function changeImage(){previewImg.style.display='none';dropZone.style.display='';processBtn.disabled=!loadedImage;gridData=null;resultSection.classList.add('hidden');}
-function loadFile(file){var reader=new FileReader();reader.onload=function(ev){var img=new Image();img.onload=function(){loadedImage=img;previewImg.src=ev.target.result;previewImg.style.display='block';dropZone.style.display='none';processBtn.disabled=false;};img.src=ev.target.result;};reader.readAsDataURL(file);}
-function getScaledImageData(img,cols,rows,mode){hiddenCanvas.width=cols;hiddenCanvas.height=rows;var ctx=hiddenCanvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,cols,rows);var iw=img.naturalWidth,ih=img.naturalHeight,scaleX=cols/iw,scaleY=rows/ih;if(mode==='fill'){var scale=Math.max(scaleX,scaleY),sw=cols/scale,sh=rows/scale;ctx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,0,0,cols,rows);}else{var scale=Math.min(scaleX,scaleY),dw=Math.round(iw*scale),dh=Math.round(ih*scale);ctx.drawImage(img,0,0,iw,ih,Math.round((cols-dw)/2),Math.round((rows-dh)/2),dw,dh);}return ctx.getImageData(0,0,cols,rows).data;}
-function setProgress(v,label){prog.value=v;progressLabel.textContent=label;if(v>=100)progressWrap.classList.add('hidden');else progressWrap.classList.remove('hidden');}
+function updateFilters(){var b=document.getElementById('bright-slider').value,c=document.getElementById('contrast-slider').value;document.getElementById('bright-val').textContent=b+'%';document.getElementById('contrast-val').textContent=c+'%';if(previewImg.style.display==='block'){previewImg.style.filter='brightness('+b+'%) contrast('+c+'%)';}}
+function loadFile(file){var reader=new FileReader();reader.onload=function(ev){var img=new Image();img.onload=function(){loadedImage=img;previewImg.src=ev.target.result;previewImg.style.display='block';dropZone.style.display='none';processBtn.disabled=false;updateFilters();};img.src=ev.target.result;};reader.readAsDataURL(file);}
+function getScaledImageData(img,cols,rows,mode){hiddenCanvas.width=cols;hiddenCanvas.height=rows;var ctx=hiddenCanvas.getContext('2d');var b=document.getElementById('bright-slider').value,c=document.getElementById('contrast-slider').value;ctx.filter='brightness('+b+'%) contrast('+c+'%)';ctx.fillStyle='#ffffff';ctx.fillRect(0,0,cols,rows);var iw=img.naturalWidth,ih=img.naturalHeight,scaleX=cols/iw,scaleY=rows/ih;if(mode==='fill'){var scale=Math.max(scaleX,scaleY),sw=cols/scale,sh=rows/scale;ctx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,0,0,cols,rows);}else{var scale=Math.min(scaleX,scaleY),dw=Math.round(iw*scale),dh=Math.round(ih*scale);ctx.drawImage(img,0,0,iw,ih,Math.round((cols-dw)/2),Math.round((rows-dh)/2),dw,dh);}return ctx.getImageData(0,0,cols,rows).data;}
+function setProgress(v,label){prog.value=v;progressLabel.textContent=label;var pct=document.getElementById('progress-pct');if(pct)pct.textContent=v+'%';if(v>=100)setTimeout(function(){progressWrap.classList.add('hidden');},500);else progressWrap.classList.remove('hidden');}
 
 // ==================== PŮVODNÍ detectColors ====================
 function detectColors(pixels,maxColors,paletteRef){
@@ -315,23 +1045,233 @@ function detectColors(pixels,maxColors,paletteRef){
   return dmcResult.slice(0,maxColors);
 }
 
-processBtn.onclick=function(){processBtn.disabled=true;progressWrap.classList.remove('hidden');setProgress(5,'Škáluji obrázek...');setTimeout(function(){var TOTAL=COLS*ROWS,imgData=getScaledImageData(loadedImage,COLS,ROWS,fitMode),pixels=[];for(var i=0;i<TOTAL;i++)pixels.push([imgData[i*4],imgData[i*4+1],imgData[i*4+2]]);var nColors=useCustomPalette?Math.min(activePalette.length,100):(parseInt(colorSlider.value)||15);setTimeout(function(){if(useCustomPalette){var usedCodes={};for(var i=0;i<pixels.length;i++){var dmc=findClosestInPalette(pixels[i],activePalette);if(!usedCodes[dmc.code])usedCodes[dmc.code]={dmc:dmc,count:0};usedCodes[dmc.code].count++;}var usedColors=[];for(var k in usedCodes)usedColors.push(usedCodes[k].dmc);usedColors.sort(function(a,b){return(0.299*a.rgb[0]+0.587*a.rgb[1]+0.114*a.rgb[2])-(0.299*b.rgb[0]+0.587*b.rgb[1]+0.114*b.rgb[2]);});palette=usedColors.map(function(d){return{r:d.rgb[0],g:d.rgb[1],b:d.rgb[2],dmc:d.code,hex:d.hex};});}else{palette=detectColors(pixels,nColors,activePalette);}gridData=[];for(var i=0;i<pixels.length;i++)gridData.push(closestColor(pixels[i],palette));editHistory=[];redoStack=[];totalEdits=0;updateEditorButtons();document.getElementById('edit-count').style.display='none';fitGrid();finishGeneration(TOTAL);},20);},20);};
-function finishGeneration(TOTAL){drawGrid();buildLegend();buildTable(TOTAL);document.getElementById('s-colors').textContent=palette.length;document.getElementById('s-total').textContent=TOTAL.toLocaleString();document.getElementById('grid-title').textContent='Mřížka '+COLS+' × '+ROWS;resultSection.classList.remove('hidden');setProgress(100,'Hotovo!');processBtn.disabled=false;}
-function closestColor(px,pal){var best=0,bestD=Infinity;for(var i=0;i<pal.length;i++){var d=colorDistance(px,[pal[i].r||pal[i][0],pal[i].g||pal[i][1],pal[i].b||pal[i][2]]);if(d<bestD){bestD=d;best=i;}}return best;}
+processBtn.onclick=function(){
+  processBtn.disabled=true;progressWrap.classList.remove('hidden');setProgress(5,'Škáluji obrázek...');
+  
+  setTimeout(function(){
+    try {
+      var TOTAL=COLS*ROWS,imgData=getScaledImageData(loadedImage,COLS,ROWS,fitMode),pixels=[];
+      for(var i=0;i<TOTAL;i++)pixels.push([imgData[i*4],imgData[i*4+1],imgData[i*4+2]]);
+      var nColors=useCustomPalette?Math.min(activePalette.length,100):(parseInt(colorSlider.value)||15);
+      var dithering = document.getElementById('use-dithering').checked;
+
+      setProgress(20, 'Detekuji barvy...');
+
+      setTimeout(function(){
+        try {
+          if(useCustomPalette){
+            var usedCodes={};for(var i=0;i<pixels.length;i++){var dmc=findClosestInPalette(pixels[i],activePalette);if(!usedCodes[dmc.code])usedCodes[dmc.code]={dmc:dmc,count:0};usedCodes[dmc.code].count++;}
+            var usedColors=[];for(var k in usedCodes)usedColors.push(usedCodes[k].dmc);
+            usedColors.sort(function(a,b){return(0.299*a.rgb[0]+0.587*a.rgb[1]+0.114*a.rgb[2])-(0.299*b.rgb[0]+0.587*b.rgb[1]+0.114*b.rgb[2]);});
+            palette=usedColors.map(function(d){return{r:d.rgb[0],g:d.rgb[1],b:d.rgb[2],dmc:d.code,hex:d.hex};});
+          }else{
+            palette=detectColors(pixels,nColors,activePalette);
+          }
+
+          if (!palette || palette.length === 0) throw new Error("Nepodařilo se vytvořit paletu barev.");
+
+          setProgress(40, 'Generuji mřížku...');
+
+          setTimeout(function(){
+            try {
+              gridData=[];
+              if(dithering){
+                var data = new Float32Array(pixels.length * 3);
+                for(var i=0; i<pixels.length; i++){ data[i*3]=pixels[i][0]; data[i*3+1]=pixels[i][1]; data[i*3+2]=pixels[i][2]; }
+                for(var y=0; y<ROWS; y++){
+                  if (y % 10 === 0) setProgress(40 + Math.round((y/ROWS)*50), 'Rozptyluji barvy ('+y+'/'+ROWS+')...');
+                  for(var x=0; x<COLS; x++){
+                    var idx = (y*COLS + x) * 3;
+                    var oldR = data[idx], oldG = data[idx+1], oldB = data[idx+2];
+                    var bestIdx = closestColor([oldR, oldG, oldB], palette);
+                    gridData[y*COLS + x] = bestIdx;
+                    var bestR = palette[bestIdx].r, bestG = palette[bestIdx].g, bestB = palette[bestIdx].b;
+                    var errR = oldR - bestR, errG = oldG - bestG, errB = oldB - bestB;
+                    
+                    if(x+1 < COLS) distributeError(data, x+1, y, errR, errG, errB, 7/16);
+                    if(y+1 < ROWS){
+                      if(x > 0) distributeError(data, x-1, y+1, errR, errG, errB, 3/16);
+                      distributeError(data, x, y+1, errR, errG, errB, 5/16);
+                      if(x+1 < COLS) distributeError(data, x+1, y+1, errR, errG, errB, 1/16);
+                    }
+                  }
+                }
+              } else {
+                for(var i=0;i<pixels.length;i++){
+                  if (i % 1000 === 0) setProgress(40 + Math.round((i/pixels.length)*50), 'Mapuji barvy...');
+                  gridData.push(closestColor(pixels[i],palette));
+                }
+              }
+
+              function distributeError(arr, x, y, er, eg, eb, w){
+                var i = (y*COLS + x) * 3;
+                arr[i] += er * w; arr[i+1] += eg * w; arr[i+2] += eb * w;
+              }
+
+              editHistory=[];redoStack=[];totalEdits=0;doneData=new Uint8Array(TOTAL);
+              updateEditorButtons();
+              if (document.getElementById('edit-count')) document.getElementById('edit-count').style.display='none';
+              fitGrid();
+              finishGeneration(TOTAL);
+            } catch (err) {
+              console.error(err);
+              alert("Chyba při generování: " + err.message);
+              processBtn.disabled = false;
+              progressWrap.classList.add('hidden');
+            }
+          }, 20);
+        } catch (err) {
+          console.error(err);
+          alert("Chyba při detekci barev: " + err.message);
+          processBtn.disabled = false;
+          progressWrap.classList.add('hidden');
+        }
+      }, 20);
+    } catch (err) {
+      console.error(err);
+      alert("Chyba při škálování: " + err.message);
+      processBtn.disabled = false;
+      progressWrap.classList.add('hidden');
+    }
+  }, 20);
+};
+function finishGeneration(TOTAL){
+  drawGrid();
+  buildLegend();
+  buildTable(TOTAL);
+  document.getElementById('s-colors').textContent=palette.length;
+  document.getElementById('s-total').textContent=TOTAL.toLocaleString();
+  document.getElementById('grid-title').textContent='Mřížka '+COLS+' × '+ROWS;
+  resultSection.classList.remove('hidden');
+  setProgress(100,'Hotovo!');
+  processBtn.disabled=false;
+}
+
+function closestColor(px, pal) {
+  if (!pal || pal.length === 0) return 0;
+  var best = 0, bestD = Infinity;
+  for (var i = 0; i < pal.length; i++) {
+    var target = [
+      pal[i].r !== undefined ? pal[i].r : (pal[i][0] !== undefined ? pal[i][0] : 0),
+      pal[i].g !== undefined ? pal[i].g : (pal[i][1] !== undefined ? pal[i][1] : 0),
+      pal[i].b !== undefined ? pal[i].b : (pal[i][2] !== undefined ? pal[i][2] : 0)
+    ];
+    var d = colorDistance(px, target);
+    if (d < bestD) {
+      bestD = d;
+      best = i;
+    }
+  }
+  return best;
+}
 function toHex(c){var r=Math.min(255,Math.max(0,Math.round(c.r||c[0]))),g=Math.min(255,Math.max(0,Math.round(c.g||c[1]))),b=Math.min(255,Math.max(0,Math.round(c.b||c[2])));return'#'+[r,g,b].map(function(v){v=v.toString(16);return v.length<2?'0'+v:v;}).join('');}
-function drawGrid(){var C=COLS,R=ROWS;gridCanvas.width=C*cellSize;gridCanvas.height=R*cellSize;var ctx=gridCanvas.getContext('2d');for(var r=0;r<R;r++)for(var c=0;c<C;c++){ctx.fillStyle=toHex(palette[gridData[r*C+c]]);ctx.fillRect(c*cellSize,r*cellSize,cellSize,cellSize);}if(cellSize>=3){ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=0.8;for(r=0;r<=R;r++){ctx.beginPath();ctx.moveTo(0,r*cellSize);ctx.lineTo(C*cellSize,r*cellSize);ctx.stroke();}for(c=0;c<=C;c++){ctx.beginPath();ctx.moveTo(c*cellSize,0);ctx.lineTo(c*cellSize,R*cellSize);ctx.stroke();}}if(cellSize>=10){var fs=Math.max(8,Math.floor(cellSize*0.4));ctx.font='bold '+fs+'px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.fillStyle='#fff';for(r=0;r<R;r++)for(c=0;c<C;c++){ctx.strokeText(gridData[r*C+c]+1,c*cellSize+cellSize/2,r*cellSize+cellSize/2);ctx.fillText(gridData[r*C+c]+1,c*cellSize+cellSize/2,r*cellSize+cellSize/2);}}}
+function isChecked(id, defaultVal=false){
+  var el = document.getElementById(id);
+  return el ? el.checked : defaultVal;
+}
+function getValue(id, defaultVal=0){
+  var el = document.getElementById(id);
+  return el ? el.value : defaultVal;
+}
+
+function drawGrid(){
+  var C=COLS,R=ROWS;
+  gridCanvas.width=C*cellSize;
+  gridCanvas.height=R*cellSize;
+  var ctx=gridCanvas.getContext('2d');
+  
+  var op = getValue('overlay-opacity') / 100;
+  var showNumbers = isChecked('view-numbers', true);
+  var boldGrid = isChecked('view-bold-grid', false);
+// ... (rest of function remains similar but uses safe calls)
+  if(op > 0 && loadedImage){
+    ctx.globalAlpha = op;
+    ctx.drawImage(loadedImage, 0, 0, loadedImage.naturalWidth, loadedImage.naturalHeight, 0, 0, C*cellSize, R*cellSize);
+    ctx.globalAlpha = 1.0;
+  } else {
+    ctx.fillStyle='#000';
+    ctx.fillRect(0,0,C*cellSize,R*cellSize);
+  }
+
+  for(var r=0;r<R;r++){
+    for(var c=0;c<C;c++){
+      var idx = r*C+c;
+      var color = toHex(palette[gridData[idx]]);
+      ctx.fillStyle = color;
+      
+      if(op > 0){ ctx.globalAlpha = 1.0 - op; }
+      ctx.fillRect(c*cellSize, r*cellSize, cellSize, cellSize);
+      ctx.globalAlpha = 1.0;
+    }
+  }
+
+  if(cellSize>=3){
+    var opacity = boldGrid ? 0.6 : 0.12;
+    ctx.strokeStyle='rgba(255,255,255,'+opacity+')';
+    ctx.lineWidth=boldGrid ? 1.2 : 0.8;
+    for(r=0;r<=R;r++){
+      ctx.beginPath();ctx.moveTo(0,r*cellSize);ctx.lineTo(C*cellSize,r*cellSize);ctx.stroke();
+    }
+    for(c=0;c<=C;c++){
+      ctx.beginPath();ctx.moveTo(c*cellSize,0);ctx.lineTo(c*cellSize,R*cellSize);ctx.stroke();
+    }
+  }
+  
+  if(showNumbers && cellSize>=10){
+    var fs=Math.max(8,Math.floor(cellSize*0.4));
+    ctx.font='bold '+fs+'px monospace';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.strokeStyle='#000';ctx.lineWidth=3;
+    ctx.fillStyle='#fff';
+    for(r=0;r<R;r++){
+      for(c=0;c<C;c++){
+        ctx.strokeText(gridData[r*C+c]+1,c*cellSize+cellSize/2,r*cellSize+cellSize/2);
+        ctx.fillText(gridData[r*C+c]+1,c*cellSize+cellSize/2,r*cellSize+cellSize/2);
+      }
+    }
+  }
+}
 function fitGrid(){var maxW=gridWrapper.clientWidth-4,maxH=Math.min(500,gridWrapper.clientHeight||500),fit=Math.min(maxW/COLS,maxH/ROWS);zoomIdx=0;while(zoomIdx<zoomLevels.length-1&&zoomLevels[zoomIdx+1]<=fit)zoomIdx++;cellSize=zoomLevels[zoomIdx];document.getElementById('zoom-label').textContent=cellSize+'px';if(gridData)drawGrid();}
 
+function loadProject(input){var file=input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(ev){try{var data=JSON.parse(ev.target.result);COLS=data.cols;ROWS=data.rows;palette=data.palette;gridData=data.gridData;if(data.doneData)doneData=new Uint8Array(Object.values(data.doneData));else doneData=new Uint8Array(COLS*ROWS);DIAMOND_MM=data.diamondSize||2.8;orientMode=data.orient||'portrait';document.getElementById('diamond-size').value=DIAMOND_MM;setOrient(orientMode);resultSection.classList.remove('hidden');drawGrid();buildLegend();buildTable(COLS*ROWS);document.getElementById('s-cols').textContent=COLS;document.getElementById('s-rows').textContent=ROWS;document.getElementById('s-total').textContent=(COLS*ROWS).toLocaleString();document.getElementById('s-colors').textContent=palette.length;alert("Projekt úspěšně načten!");}catch(e){alert("Chyba při načítání projektu: "+e.message);}};reader.readAsText(file);}
+function saveProject(){if(!gridData){alert("Nejdříve vygenerujte mřížku!");return;}var data={cols:COLS,rows:ROWS,palette:palette,gridData:gridData,doneData:Array.from(doneData),diamondSize:DIAMOND_MM,orient:orientMode,timestamp:new Date().toISOString()},blob=new Blob([JSON.stringify(data)],{type:'application/json'}),link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='diamond-project-'+new Date().getTime()+'.json';link.click();}
+
 // ==================== EDITOR ====================
-function toggleEditMode(){editMode=!editMode;var btn=document.getElementById('btn-edit-mode'),ind=document.getElementById('edit-indicator'),st=document.getElementById('edit-status');if(editMode){btn.textContent='Vypnout editor';btn.className='btn btn-small btn-danger';ind.className='status-dot on';st.textContent='Editor zapnutý';document.getElementById('btn-brush').disabled=false;document.getElementById('btn-eraser').disabled=false;document.getElementById('btn-fill').disabled=false;setTool('brush');}else{btn.textContent='Zapnout editor';btn.className='btn btn-small';ind.className='status-dot off';st.textContent='Editor vypnutý';document.getElementById('btn-brush').disabled=true;document.getElementById('btn-eraser').disabled=true;document.getElementById('btn-fill').disabled=true;resetLegendSelection();}updateEditorButtons();}
-function setTool(tool){currentTool=tool;document.getElementById('btn-brush').className='btn btn-small'+(tool==='brush'?' btn-primary':'');document.getElementById('btn-eraser').className='btn btn-small'+(tool==='eraser'?' btn-danger':'');document.getElementById('btn-fill').className='btn btn-small'+(tool==='fill'?' btn-warning':'');}
-function selectColor(index){if(currentTool==='eraser')setTool('brush');selectedColorIndex=index;resetLegendSelection();var items=document.querySelectorAll('.leg-item');if(items[index])items[index].classList.add('selected');}
+function toggleEditMode(){editMode=!editMode;var btn=document.getElementById('btn-edit-mode'),ind=document.getElementById('edit-indicator'),st=document.getElementById('edit-status');if(editMode){btn.textContent='Vypnout editor';btn.className='btn btn-small btn-danger';ind.className='status-dot on';st.textContent='Editor zapnutý';document.getElementById('btn-brush').disabled=false;document.getElementById('btn-picker').disabled=false;document.getElementById('btn-marker').disabled=false;document.getElementById('btn-eraser').disabled=false;document.getElementById('btn-fill').disabled=false;setTool('brush');}else{btn.textContent='Zapnout editor';btn.className='btn btn-small';ind.className='status-dot off';st.textContent='Editor vypnutý';document.getElementById('btn-brush').disabled=true;document.getElementById('btn-picker').disabled=true;document.getElementById('btn-marker').disabled=true;document.getElementById('btn-eraser').disabled=true;document.getElementById('btn-fill').disabled=true;resetLegendSelection();}updateEditorButtons();}
+function setTool(tool){currentTool=tool;document.getElementById('btn-brush').className='btn btn-small'+(tool==='brush'?' btn-primary':'');document.getElementById('btn-picker').className='btn btn-small'+(tool==='picker'?' btn-primary':'');document.getElementById('btn-marker').className='btn btn-small'+(tool==='marker'?' btn-primary':'');document.getElementById('btn-eraser').className='btn btn-small'+(tool==='eraser'?' btn-danger':'');document.getElementById('btn-fill').className='btn btn-small'+(tool==='fill'?' btn-warning':'');}
+function selectColor(index){
+  if(currentTool==='eraser')setTool('brush');
+  selectedColorIndex=index;
+  resetLegendSelection();
+  var items=document.querySelectorAll('.leg-item');
+  if(items[index])items[index].classList.add('selected');
+}
+function replaceAllColor(oldIdx){
+  var newIdx = selectedColorIndex;
+  if(oldIdx === newIdx) return;
+  if(!confirm("Opravdu chcete nahradit všechny kamínky barvy " + palette[oldIdx].dmc + " barvou " + palette[newIdx].dmc + "?")) return;
+  var count = 0;
+  for(var i=0; i<gridData.length; i++){
+    if(gridData[i] === oldIdx){
+      gridData[i] = newIdx;
+      count++;
+    }
+  }
+  totalEdits += count;
+  editHistory.push({type:'bulk', oldIdx:oldIdx, newIdx:newIdx});
+  drawGrid();
+  buildTable(COLS*ROWS);
+  alert("Nahrazeno " + count + " kamínků.");
+}
 function resetLegendSelection(){var items=document.querySelectorAll('.leg-item');for(var i=0;i<items.length;i++)items[i].classList.remove('selected');}
 function getCell(e){var rect=gridCanvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top,col=Math.floor(x/cellSize),row=Math.floor(y/cellSize);if(col>=0&&col<COLS&&row>=0&&row<ROWS)return{col:col,row:row,idx:row*COLS+col};return null;}
 function floodFill(col,row,targetColor,newColor){if(targetColor===newColor)return;var stack=[{col:col,row:row}],visited={},C=COLS,R=ROWS,changes=[];while(stack.length>0){var p=stack.pop(),c=p.col,r=p.row,key=c+','+r;if(c<0||c>=C||r<0||r>=R||visited[key])continue;if(gridData[r*C+c]!==targetColor)continue;visited[key]=true;changes.push({col:c,row:r,oldColor:targetColor});gridData[r*C+c]=newColor;stack.push({col:c+1,row:r},{col:c-1,row:r},{col:c,row:r+1},{col:c,row:r-1});}return changes;}
 
 var isDrawing=false,lastCell=null;
-gridCanvas.addEventListener('mousedown',function(e){if(e.button===2){e.preventDefault();return;}if(!editMode||e.button!==0)return;var cell=getCell(e);if(!cell)return;isDrawing=true;lastCell=cell;if(currentTool==='fill'){var changes=floodFill(cell.col,cell.row,gridData[cell.idx],selectedColorIndex);if(changes&&changes.length>0){editHistory.push({type:'fill',changes:changes});redoStack=[];totalEdits+=changes.length;updateEditorButtons();document.getElementById('edit-count').style.display='inline';document.getElementById('edit-count').textContent='Změněno: '+totalEdits;drawGrid();buildTable(COLS*ROWS);}}else{var old=gridData[cell.idx],nc=(currentTool==='eraser')?closestColor(palette[old],palette):selectedColorIndex;if(old!==nc){editHistory.push({type:'single',col:cell.col,row:cell.row,oldColor:old,newColor:nc});redoStack=[];totalEdits++;gridData[cell.idx]=nc;updateEditorButtons();document.getElementById('edit-count').style.display='inline';document.getElementById('edit-count').textContent='Změněno: '+totalEdits;drawGrid();buildTable(COLS*ROWS);}}});
+gridCanvas.addEventListener('mousedown',function(e){if(e.button===2){e.preventDefault();return;}if(!editMode||e.button!==0)return;var cell=getCell(e);if(!cell)return;
+if(currentTool==='picker'){selectColor(gridData[cell.idx]);setTool('brush');return;}
+if(currentTool==='marker'){doneData[cell.idx]=doneData[cell.idx]?0:1;drawGrid();return;}
+isDrawing=true;lastCell=cell;if(currentTool==='fill'){var changes=floodFill(cell.col,cell.row,gridData[cell.idx],selectedColorIndex);if(changes&&changes.length>0){editHistory.push({type:'fill',changes:changes});redoStack=[];totalEdits+=changes.length;updateEditorButtons();document.getElementById('edit-count').style.display='inline';document.getElementById('edit-count').textContent='Změněno: '+totalEdits;drawGrid();buildTable(COLS*ROWS);}}else{var old=gridData[cell.idx],nc=(currentTool==='eraser')?closestColor(palette[old],palette):selectedColorIndex;if(old!==nc){editHistory.push({type:'single',col:cell.col,row:cell.row,oldColor:old,newColor:nc});redoStack=[];totalEdits++;gridData[cell.idx]=nc;updateEditorButtons();document.getElementById('edit-count').style.display='inline';document.getElementById('edit-count').textContent='Změněno: '+totalEdits;drawGrid();buildTable(COLS*ROWS);}}});
 gridCanvas.addEventListener('mousemove',function(e){if(!isDrawing||!editMode||currentTool==='fill')return;var cell=getCell(e);if(!cell||(cell.col===lastCell.col&&cell.row===lastCell.row))return;lastCell=cell;var old=gridData[cell.idx],nc=(currentTool==='eraser')?closestColor(palette[old],palette):selectedColorIndex;if(old!==nc){editHistory.push({type:'single',col:cell.col,row:cell.row,oldColor:old,newColor:nc});redoStack=[];totalEdits++;gridData[cell.idx]=nc;updateEditorButtons();document.getElementById('edit-count').textContent='Změněno: '+totalEdits;drawGrid();}});
 gridCanvas.addEventListener('mouseup',function(){isDrawing=false;});
 gridCanvas.addEventListener('contextmenu',function(e){e.preventDefault();});
@@ -341,7 +1281,17 @@ function undoEdit(){if(editHistory.length===0)return;var a=editHistory.pop();if(
 function redoEdit(){if(redoStack.length===0)return;var a=redoStack.pop();if(a.type==='single'){editHistory.push({type:'single',col:a.col,row:a.row,oldColor:gridData[a.row*COLS+a.col],newColor:a.newColor});gridData[a.row*COLS+a.col]=a.newColor;totalEdits++;}else{var ec=[];for(var i=0;i<a.changes.length;i++){ec.push({col:a.changes[i].col,row:a.changes[i].row,oldColor:gridData[a.changes[i].row*COLS+a.changes[i].col],newColor:a.changes[i].newColor});gridData[a.changes[i].row*COLS+a.changes[i].col]=a.changes[i].newColor;totalEdits++;}editHistory.push({type:'fill',changes:ec});}updateEditorButtons();document.getElementById('edit-count').textContent='Změněno: '+totalEdits;drawGrid();buildTable(COLS*ROWS);}
 function updateEditorButtons(){document.getElementById('btn-undo').disabled=editHistory.length===0;document.getElementById('btn-redo').disabled=redoStack.length===0;}
 
-function buildLegend(){var legend=document.getElementById('legend');legend.innerHTML='';for(var i=0;i<palette.length;i++){var hex=toHex(palette[i]),item=document.createElement('div');item.className='leg-item';item.onclick=(function(idx){return function(){if(editMode)selectColor(idx);};})(i);item.innerHTML='<span class="leg-num">'+(i+1)+'</span><span class="leg-code">DMC '+palette[i].dmc+'</span><div class="leg-dot" style="background:'+hex+'"></div><span>'+hex.toUpperCase()+'</span>';legend.appendChild(item);}}
+function buildLegend(){
+  var legend=document.getElementById('legend');
+  legend.innerHTML='';
+  for(var i=0;i<palette.length;i++){
+    var hex=toHex(palette[i]),item=document.createElement('div');
+    item.className='leg-item';
+    item.innerHTML='<span class="leg-num">'+(i+1)+'</span><span class="leg-code">DMC '+palette[i].dmc+'</span><div class="leg-dot" style="background:'+hex+'"></div><div class="leg-info"><span>'+hex.toUpperCase()+'</span></div>';
+    item.onclick=(function(idx){return function(){if(editMode)selectColor(idx);};})(i);
+    legend.appendChild(item);
+  }
+}
 function buildTable(TOTAL){var counts=[];for(var i=0;i<palette.length;i++)counts.push(0);for(var i=0;i<gridData.length;i++)counts[gridData[i]]++;var rows=[];for(var i=0;i<palette.length;i++)rows.push({num:(i+1),dmc:palette[i].dmc,hex:toHex(palette[i]),count:counts[i],pct:((counts[i]/TOTAL)*100).toFixed(1)});rows.sort(function(a,b){return b.count-a.count;});var tbody=document.createElement('tbody');rows.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td style="text-align:right;font-weight:600">'+r.num+'</td><td style="font-weight:700;color:#e0e0e0">'+r.dmc+'</td><td><div style="width:14px;height:14px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);background:'+r.hex+';display:inline-block"></div></td><td style="font-family:monospace">'+r.hex.toUpperCase()+'</td><td style="text-align:right">'+r.count.toLocaleString()+' ks</td><td style="text-align:right;color:#888">'+r.pct+' %</td>';tbody.appendChild(tr);});var table=document.getElementById('color-table');table.innerHTML='<thead><tr style="border-bottom:2px solid #333"><th style="text-align:right">Č.</th><th>DMC kód</th><th>Barva</th><th>HEX</th><th style="text-align:right">Kusů</th><th style="text-align:right">%</th></tr></thead>';table.appendChild(tbody);}
 
 document.getElementById('zoom-in').onclick=function(){if(zoomIdx<zoomLevels.length-1){zoomIdx++;cellSize=zoomLevels[zoomIdx];document.getElementById('zoom-label').textContent=cellSize+'px';if(gridData)drawGrid();}};
@@ -350,132 +1300,140 @@ document.getElementById('btn-fit').onclick=fitGrid;
 
 // ==================== PNG EXPORT ====================
 document.getElementById('download-grid-btn').onclick=function(){
-  if(!gridData)return;var C=COLS,R=ROWS,pcs=getPrintCellSize(),gw=C*pcs,gh=R*pcs;
-  var cw=(orientMode==='portrait')?A4_PORTRAIT_W:A4_PORTRAIT_H,ch=(orientMode==='portrait')?A4_PORTRAIT_H:A4_PORTRAIT_W;
+  if(!gridData)return;
+  var px = getPaperPx();
+  var C=COLS,R=ROWS,pcs=getPrintCellSize(),gw=C*pcs,gh=R*pcs;
+  var cw=(orientMode==='portrait')?px.w:px.h,ch=(orientMode==='portrait')?px.h:px.w;
   var big=document.createElement('canvas');big.width=cw;big.height=ch;var ctx=big.getContext('2d');
   ctx.fillStyle='#fff';ctx.fillRect(0,0,cw,ch);var ox=Math.round((cw-gw)/2),oy=Math.round((ch-gh)/2);
   for(var r=0;r<R;r++)for(var c=0;c<C;c++){ctx.fillStyle=toHex(palette[gridData[r*C+c]]);ctx.fillRect(ox+c*pcs,oy+r*pcs,pcs,pcs);}
-  ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1;for(r=0;r<=R;r++){ctx.beginPath();ctx.moveTo(ox,oy+r*pcs);ctx.lineTo(ox+gw,oy+r*pcs);ctx.stroke();}for(c=0;c<=C;c++){ctx.beginPath();ctx.moveTo(ox+c*pcs,oy);ctx.lineTo(ox+c*pcs,oy+gh);ctx.stroke();}
+  var boldGrid = document.getElementById('view-bold-grid').checked;
+  var opacity = boldGrid ? 0.6 : 0.3;
+  ctx.strokeStyle='rgba(0,0,0,'+opacity+')';
+  ctx.lineWidth=boldGrid ? 2 : 1;
+  for(r=0;r<=R;r++){ctx.beginPath();ctx.moveTo(ox,oy+r*pcs);ctx.lineTo(ox+gw,oy+r*pcs);ctx.stroke();}
+  for(c=0;c<=C;c++){ctx.beginPath();ctx.moveTo(ox+c*pcs,oy);ctx.lineTo(ox+c*pcs,oy+gh);ctx.stroke();}
   if(pcs>8){var fs=Math.max(9,Math.round(pcs*0.38));ctx.font='bold '+fs+'px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.fillStyle='#fff';for(r=0;r<R;r++)for(c=0;c<C;c++){ctx.strokeText(gridData[r*C+c]+1,ox+c*pcs+pcs/2,oy+r*pcs+pcs/2);ctx.fillText(gridData[r*C+c]+1,ox+c*pcs+pcs/2,oy+r*pcs+pcs/2);}}
-  var link=document.createElement('a');link.download='diamond-painting-A4-'+orientMode+'-'+DIAMOND_MM.toFixed(1)+'mm-300dpi.png';link.href=big.toDataURL('image/png');document.body.appendChild(link);link.click();document.body.removeChild(link);
+  
+  big.toBlob(function(blob){
+    var link=document.createElement('a');
+    link.download='diamond-painting-'+paperFormat+'-'+orientMode+'-'+DIAMOND_MM.toFixed(1)+'mm-300dpi.png';
+    link.href=URL.createObjectURL(blob);
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(function(){document.body.removeChild(link);URL.revokeObjectURL(link.href);},100);
+  }, 'image/png');
 };
 
 // ==================== PDF EXPORT ====================
-document.getElementById('download-pdf-btn').onclick=function(){
+document.getElementById('download-pdf-btn').onclick=async function(){
   if(!gridData)return;
-  var C=COLS,R=ROWS,pcs=getPrintCellSize(),gw=C*pcs,gh=R*pcs;
-  var isP=(orientMode==='portrait');
-  var cW=isP?A4_PORTRAIT_W:A4_PORTRAIT_H,cH=isP?A4_PORTRAIT_H:A4_PORTRAIT_W;
-  
-  var p1=document.createElement('canvas');p1.width=cW;p1.height=cH;var c1=p1.getContext('2d');
-  c1.fillStyle='#fff';c1.fillRect(0,0,cW,cH);var ox=Math.round((cW-gw)/2),oy=Math.round((cH-gh)/2);
-  for(var r=0;r<R;r++)for(var c=0;c<C;c++){c1.fillStyle=toHex(palette[gridData[r*C+c]]);c1.fillRect(ox+c*pcs,oy+r*pcs,pcs,pcs);}
-  c1.strokeStyle='rgba(0,0,0,0.3)';c1.lineWidth=1;for(r=0;r<=R;r++){c1.beginPath();c1.moveTo(ox,oy+r*pcs);c1.lineTo(ox+gw,oy+r*pcs);c1.stroke();}for(c=0;c<=C;c++){c1.beginPath();c1.moveTo(ox+c*pcs,oy);c1.lineTo(ox+c*pcs,oy+gh);c1.stroke();}
-  if(pcs>8){var fs=Math.max(9,Math.round(pcs*0.38));c1.font='bold '+fs+'px monospace';c1.textAlign='center';c1.textBaseline='middle';c1.strokeStyle='#000';c1.lineWidth=3;c1.fillStyle='#fff';for(r=0;r<R;r++)for(c=0;c<C;c++){c1.strokeText(gridData[r*C+c]+1,ox+c*pcs+pcs/2,oy+r*pcs+pcs/2);c1.fillText(gridData[r*C+c]+1,ox+c*pcs+pcs/2,oy+r*pcs+pcs/2);}}
-  c1.fillStyle='#000';c1.font='12px system-ui,sans-serif';c1.textAlign='center';c1.fillText('Diamantové malování – Předloha  •  Strana 1/2  •  BY Vufdux',cW/2,cH-8);
+  const btn = this;
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Generuji PDF...';
 
-  var counts=[];for(var i=0;i<palette.length;i++)counts.push(0);for(var i=0;i<gridData.length;i++)counts[gridData[i]]++;
-  var rows=[];for(var i=0;i<palette.length;i++)rows.push({n:(i+1),dmc:palette[i].dmc,hex:toHex(palette[i]),cnt:counts[i],pct:((counts[i]/(C*R))*100).toFixed(1)});rows.sort(function(a,b){return b.cnt-a.cnt;});
+  try {
+    var px = getPaperPx();
+    var C=COLS,R=ROWS,pcs=getPrintCellSize(),gw=C*pcs,gh=R*pcs;
+    var isP=(orientMode==='portrait');
+    var cW=isP?px.w:px.h,cH=isP?px.h:px.w;
+    
+    var p1=document.createElement('canvas');p1.width=cW;p1.height=cH;var c1=p1.getContext('2d');
+    c1.fillStyle='#fff';c1.fillRect(0,0,cW,cH);var ox=Math.round((cW-gw)/2),oy=Math.round((cH-gh)/2);
+    for(var r=0;r<R;r++)for(var c=0;c<C;c++){c1.fillStyle=toHex(palette[gridData[r*C+c]]);c1.fillRect(ox+c*pcs,oy+r*pcs,pcs,pcs);}
+    var boldGrid = document.getElementById('view-bold-grid').checked;
+    var opacity = boldGrid ? 0.6 : 0.3;
+    c1.strokeStyle='rgba(0,0,0,'+opacity+')';
+    c1.lineWidth=boldGrid ? 2 : 1;
+    for(r=0;r<=R;r++){c1.beginPath();c1.moveTo(ox,oy+r*pcs);c1.lineTo(ox+gw,oy+r*pcs);c1.stroke();}
+    for(c=0;c<=C;c++){c1.beginPath();c1.moveTo(ox+c*pcs,oy);c1.lineTo(ox+c*pcs,oy+gh);c1.stroke();}
+    if(pcs>8){var fs=Math.max(9,Math.round(pcs*0.38));c1.font='bold '+fs+'px monospace';c1.textAlign='center';c1.textBaseline='middle';c1.strokeStyle='#000';c1.lineWidth=3;c1.fillStyle='#fff';for(r=0;r<R;r++)for(c=0;c<C;c++){c1.strokeText(gridData[r*C+c]+1,ox+c*pcs+pcs/2,oy+r*pcs+pcs/2);c1.fillText(gridData[r*C+c]+1,ox+c*pcs+pcs/2,oy+r*pcs+pcs/2);}}
+    c1.fillStyle='#000';c1.font='12px system-ui,sans-serif';c1.textAlign='center';c1.fillText('Diamantové malování – Předloha ('+paperFormat+')  •  Strana 1/2  •  BY Vufdux',cW/2,cH-8);
 
-  // --- LEGEND PAGE SETTINGS ---
-  var margin=50, tableW=cW-margin*2;
-  var headerH=100, footerH=60, rowH=90;
-  var colW=[70,160,80,170,190,120];
-  var totalColW=colW.reduce(function(a,b){return a+b;},0);
-  var scl=tableW/totalColW;
-  var colPos=[0];for(var k=0;k<colW.length-1;k++)colPos.push(colPos[k]+colW[k]);
-  colPos=colPos.map(function(x){return margin+Math.round(x*scl);});
-  colW=colW.map(function(w){return Math.round(w*scl);});
-  var tableHdrH=70;
-  var usableH=cH-headerH-tableHdrH-footerH;
-  var rowsPerPage=Math.floor(usableH/rowH);
+    var counts=[];for(var i=0;i<palette.length;i++)counts.push(0);for(var i=0;i<gridData.length;i++)counts[gridData[i]]++;
+    var rows=[];for(var i=0;i<palette.length;i++)rows.push({n:(i+1),dmc:palette[i].dmc,hex:toHex(palette[i]),cnt:counts[i],pct:((counts[i]/(C*R))*100).toFixed(1)});rows.sort(function(a,b){return b.cnt-a.cnt;});
 
-  // --- HELPER: draw one legend page canvas ---
-  function drawLegendPage(pageRows, pageNum, totalPages, isFirst){
-    var pc=document.createElement('canvas');pc.width=cW;pc.height=cH;var cx=pc.getContext('2d');
-    cx.fillStyle='#fff';cx.fillRect(0,0,cW,cH);
+    var margin=50, tableW=cW-margin*2, headerH=100, footerH=60, rowH=90;
+    var colW=[150,160,80,170,190,120];
+    var totalColW=colW.reduce(function(a,b){return a+b;},0);
+    var scl=tableW/totalColW;
+    var colPos=[0];for(var k=0;k<colW.length-1;k++)colPos.push(colPos[k]+colW[k]);
+    colPos=colPos.map(function(x){return margin+Math.round(x*scl);});
+    colW=colW.map(function(w){return Math.round(w*scl);});
+    var tableHdrH=70, printPad=60;
+    var usableH=cH-headerH-tableHdrH-footerH-printPad*2;
+    var rowsPerPage=Math.floor(usableH/rowH);
 
-    // Header
-    cx.fillStyle='#1a1a2e';cx.fillRect(0,0,cW,headerH);
-    cx.fillStyle='#fff';cx.font='bold 42px system-ui,sans-serif';cx.textAlign='left';
-    cx.fillText('Legenda a spotřeba kamínků',margin,60);
-    cx.font='22px system-ui,sans-serif';cx.fillStyle='#aaa';
-    cx.fillText('A4 '+(isP?'na výšku':'na šířku')+'  •  '+C+'×'+R+' = '+(C*R).toLocaleString()+' kamínků  •  '+palette.length+' barev  •  '+DIAMOND_MM.toFixed(1)+' mm  •  BY Vufdux',margin,88);
-
-    // Table header
-    var tHdrY=headerH;
-    cx.fillStyle='#2d2d4e';cx.fillRect(margin,tHdrY,tableW,tableHdrH);
-    cx.fillStyle='#fff';cx.font='bold 30px system-ui,sans-serif';
-    var hdrs=['Č.','DMC kód','Barva','HEX','Kusů','%'];
-    var aligns=['right','left','center','left','right','right'];
-    for(var k=0;k<hdrs.length;k++){
-      cx.textAlign=aligns[k];
-      var tx=aligns[k]==='right'?colPos[k]+colW[k]-14:aligns[k]==='center'?colPos[k]+colW[k]/2:colPos[k]+14;
-      cx.fillText(hdrs[k],tx,tHdrY+tableHdrH/2+11);
+    function drawLegendPage(pageRows, pageNum, totalPages, isFirst){
+      var pc=document.createElement('canvas');pc.width=cW;pc.height=cH;var cx=pc.getContext('2d');
+      cx.fillStyle='#fff';cx.fillRect(0,0,cW,cH);
+      cx.fillStyle='#1a1a2e';cx.fillRect(0,0,cW,headerH);
+      cx.fillStyle='#fff';cx.font='bold 42px system-ui,sans-serif';cx.textAlign='left';
+      cx.fillText('Legenda a spotřeba kamínků',margin,60);
+      cx.font='22px system-ui,sans-serif';cx.fillStyle='#aaa';
+      cx.fillText(paperFormat+' '+(isP?'na výšku':'na šířku')+'  •  '+C+'×'+R+' = '+(C*R).toLocaleString()+' kamínků  •  '+palette.length+' barev  •  '+DIAMOND_MM.toFixed(1)+' mm  •  BY Vufdux',margin,88);
+      
+      var tHdrY=headerH;
+      cx.fillStyle='#2d2d4e';cx.fillRect(margin,tHdrY,tableW,tableHdrH);
+      cx.fillStyle='#fff';cx.font='bold 30px system-ui,sans-serif';
+      var hdrs=['Č.','DMC kód','Barva','HEX','Kusů','%'], aligns=['right','left','center','left','right','right'];
+      for(var k=0;k<hdrs.length;k++){
+        cx.textAlign=aligns[k];
+        var tx=aligns[k]==='right'?colPos[k]+colW[k]-14:aligns[k]==='center'?colPos[k]+colW[k]/2:colPos[k]+14;
+        cx.fillText(hdrs[k],tx,tHdrY+tableHdrH/2+11);
+      }
+      var y=tHdrY+tableHdrH;
+      for(var i=0;i<pageRows.length;i++){
+        var row=pageRows[i];
+        cx.fillStyle=i%2===0?'#f4f4fc':'#fff';cx.fillRect(margin,y,tableW,rowH);
+        cx.strokeStyle='#d0d0e8';cx.lineWidth=1;cx.beginPath();cx.moveTo(margin,y+rowH);cx.lineTo(margin+tableW,y+rowH);cx.stroke();
+        var cy2=y+rowH/2;
+        cx.fillStyle='#333';cx.font='bold 34px monospace';cx.textAlign='right';cx.fillText(row.n,colPos[0]+colW[0]-14,cy2+12);
+        cx.fillStyle='#111';cx.font='bold 36px monospace';cx.textAlign='left';cx.fillText(row.dmc,colPos[1]+14,cy2+12);
+        var sw=54,sx=colPos[2]+colW[2]/2-sw/2,sy=cy2-sw/2;
+        cx.fillStyle=row.hex;cx.fillRect(sx,sy,sw,sw);cx.strokeStyle='#888';cx.lineWidth=2;cx.strokeRect(sx,sy,sw,sw);
+        cx.fillStyle='#333';cx.font='32px monospace';cx.textAlign='left';cx.fillText(row.hex.toUpperCase(),colPos[3]+14,cy2+12);
+        cx.fillStyle='#111';cx.font='bold 34px monospace';cx.textAlign='right';cx.fillText(row.cnt.toLocaleString()+' ks',colPos[4]+colW[4]-14,cy2+12);
+        cx.fillStyle='#555';cx.font='32px monospace';cx.textAlign='right';cx.fillText(row.pct+' %',colPos[5]+colW[5]-14,cy2+12);
+        y+=rowH;
+      }
+      cx.strokeStyle='#2d2d4e';cx.lineWidth=3;cx.beginPath();cx.moveTo(margin,y);cx.lineTo(margin+tableW,y);cx.stroke();
+      var footerY=y+16;
+      cx.fillStyle='#1a1a2e';cx.fillRect(0,footerY,cW,footerH);
+      cx.fillStyle='#fff';cx.font='bold 24px system-ui,sans-serif';cx.textAlign='left';
+      cx.fillText('Celkem: '+(C*R).toLocaleString()+' kamínků  |  '+palette.length+' DMC barev',margin,footerY+footerH/2+9);
+      cx.fillStyle='#aaa';cx.font='20px system-ui,sans-serif';cx.textAlign='right';
+      cx.fillText('Strana '+pageNum+'/'+totalPages+'  •  BY Vufdux',cW-margin,footerY+footerH/2+9);
+      return pc;
     }
 
-    // Rows
-    var y=tHdrY+tableHdrH;
-    for(var i=0;i<pageRows.length;i++){
-      var row=pageRows[i];
-      cx.fillStyle=i%2===0?'#f4f4fc':'#fff';
-      cx.fillRect(margin,y,tableW,rowH);
-      cx.strokeStyle='#d0d0e8';cx.lineWidth=1;cx.beginPath();cx.moveTo(margin,y+rowH);cx.lineTo(margin+tableW,y+rowH);cx.stroke();
-      var cy2=y+rowH/2;
-      // Č.
-      cx.fillStyle='#333';cx.font='bold 34px monospace';cx.textAlign='right';
-      cx.fillText(row.n,colPos[0]+colW[0]-14,cy2+12);
-      // DMC
-      cx.fillStyle='#111';cx.font='bold 36px monospace';cx.textAlign='left';
-      cx.fillText(row.dmc,colPos[1]+14,cy2+12);
-      // Swatch
-      var sw=54,sx=colPos[2]+colW[2]/2-sw/2,sy=cy2-sw/2;
-      cx.fillStyle=row.hex;cx.fillRect(sx,sy,sw,sw);
-      cx.strokeStyle='#888';cx.lineWidth=2;cx.strokeRect(sx,sy,sw,sw);
-      // HEX
-      cx.fillStyle='#333';cx.font='32px monospace';cx.textAlign='left';
-      cx.fillText(row.hex.toUpperCase(),colPos[3]+14,cy2+12);
-      // Kusů
-      cx.fillStyle='#111';cx.font='bold 34px monospace';cx.textAlign='right';
-      cx.fillText(row.cnt.toLocaleString()+' ks',colPos[4]+colW[4]-14,cy2+12);
-      // %
-      cx.fillStyle='#555';cx.font='32px monospace';cx.textAlign='right';
-      cx.fillText(row.pct+' %',colPos[5]+colW[5]-14,cy2+12);
-      y+=rowH;
+    var legendCanvases=[];
+    var totalLegendPages=Math.ceil(rows.length/rowsPerPage);
+    for(var p=0;p<totalLegendPages;p++){
+      var pageRows=rows.slice(p*rowsPerPage,(p+1)*rowsPerPage);
+      legendCanvases.push(drawLegendPage(pageRows, p+2, 1+totalLegendPages, p===0));
     }
-    // Bottom table border
-    cx.strokeStyle='#2d2d4e';cx.lineWidth=3;cx.beginPath();cx.moveTo(margin,y);cx.lineTo(margin+tableW,y);cx.stroke();
 
-    // Footer
-    cx.fillStyle='#1a1a2e';cx.fillRect(0,cH-footerH,cW,footerH);
-    cx.fillStyle='#fff';cx.font='bold 24px system-ui,sans-serif';cx.textAlign='left';
-    cx.fillText('Celkem: '+(C*R).toLocaleString()+' kamínků  |  '+palette.length+' DMC barev',margin,cH-footerH/2+9);
-    cx.fillStyle='#aaa';cx.font='20px system-ui,sans-serif';cx.textAlign='right';
-    cx.fillText('Strana '+pageNum+'/'+totalPages+'  •  BY Vufdux',cW-margin,cH-footerH/2+9);
-    return pc;
-  }
-
-  // --- SPLIT rows into pages and generate canvases ---
-  var legendCanvases=[];
-  var totalLegendPages=Math.ceil(rows.length/rowsPerPage);
-  for(var p=0;p<totalLegendPages;p++){
-    var pageRows=rows.slice(p*rowsPerPage,(p+1)*rowsPerPage);
-    legendCanvases.push(drawLegendPage(pageRows, p+2, 1+totalLegendPages, p===0));
-  }
-
-  var imgTags='<img src="'+p1.toDataURL('image/jpeg',0.94)+'">';
-  for(var p=0;p<legendCanvases.length;p++){
-    var isLast=(p===legendCanvases.length-1);
-    imgTags+='<img src="'+legendCanvases[p].toDataURL('image/jpeg',0.94)+'"'+(isLast?' onload="setTimeout(function(){window.print();},400)"':'')+' >';
-  }
-  var html='<!DOCTYPE html><html><head><title>Diamantove malovani</title><style>@page{size:A4 '+(isP?'portrait':'landscape')+';margin:0}body{margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}img{width:100%;height:auto;display:block;page-break-after:always}img:last-child{page-break-after:auto}</style></head><body>'+imgTags+'</body></html>';
-  var blob=new Blob([html],{type:'text/html'});
-  var blobUrl=URL.createObjectURL(blob);
-  var pw=window.open(blobUrl,'_blank');
-  if(!pw){
-    // Fallback: stáhni jako HTML soubor
-    var a=document.createElement('a');a.href=blobUrl;a.download='diamond-painting-print.html';document.body.appendChild(a);a.click();document.body.removeChild(a);
-    setTimeout(function(){URL.revokeObjectURL(blobUrl);},5000);
+    if (!window.jspdf) {
+      alert("Chyba: Knihovna jsPDF nebyla načtena. Zkontrolujte připojení k internetu.");
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: isP ? 'p' : 'l', unit: 'px', format: [cW, cH] });
+    
+    doc.addImage(p1.toDataURL('image/png'), 'PNG', 0, 0, cW, cH);
+    for(var p=0;p<legendCanvases.length;p++){
+      doc.addPage([cW, cH], isP ? 'p' : 'l');
+      doc.addImage(legendCanvases[p].toDataURL('image/png'), 'PNG', 0, 0, cW, cH);
+    }
+    doc.save('diamond-painting-'+paperFormat.toLowerCase()+'-' + orientMode + '-' + DIAMOND_MM.toFixed(1) + 'mm.pdf');
+  } catch (err) {
+    console.error(err);
+    alert("Při generování PDF došlo k chybě: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
   }
 };
 
@@ -490,7 +1448,15 @@ document.getElementById('download-legend-btn').onclick=function(){
   ctx.strokeStyle='#444';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(35,y+8);ctx.lineTo(W-35,y+8);ctx.stroke();y+=28;
   rows.forEach(function(r){ctx.fillStyle='#fff';ctx.font='bold 17px monospace';ctx.textAlign='right';ctx.fillText(r.n,colX[0]+25,y+2);ctx.textAlign='left';ctx.fillText(r.dmc,colX[1],y+2);ctx.fillStyle=r.hex;ctx.fillRect(colX[2],y-12,24,24);ctx.strokeStyle='#444';ctx.lineWidth=2;ctx.strokeRect(colX[2],y-12,24,24);ctx.fillStyle='#ccc';ctx.font='16px monospace';ctx.fillText(r.hex.toUpperCase(),colX[3],y+2);ctx.textAlign='right';ctx.fillStyle='#fff';ctx.fillText(r.cnt.toLocaleString()+' ks',colX[4]+70,y+2);ctx.fillStyle='#888';ctx.fillText(r.pct+' %',colX[5]+50,y+2);y+=34;});
   y+=30;ctx.fillStyle='#fff';ctx.font='bold 18px system-ui,sans-serif';ctx.textAlign='left';ctx.fillText('Celkem: '+TOTAL.toLocaleString()+' kamínků  |  '+palette.length+' DMC barev',35,y);y+=25;ctx.fillStyle='#666';ctx.font='italic 14px system-ui,sans-serif';ctx.fillText('BY Vufdux  •  Diamantové malování – Návrhář předloh',35,y);
-  var link=document.createElement('a');link.download='diamond-painting-legend-'+orientMode+'-'+DIAMOND_MM.toFixed(1)+'mm.png';link.href=big.toDataURL('image/png');document.body.appendChild(link);link.click();document.body.removeChild(link);
+  
+  big.toBlob(function(blob){
+    var link=document.createElement('a');
+    link.download='diamond-painting-legend-'+orientMode+'-'+DIAMOND_MM.toFixed(1)+'mm.png';
+    link.href=URL.createObjectURL(blob);
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(function(){document.body.removeChild(link);URL.revokeObjectURL(link.href);},100);
+  }, 'image/png');
 };
 </script>
 </body>
